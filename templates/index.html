@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="/static/jquery-3.3.1.js"></script>
+</head>
+<body>
+<h2>this is Index!</h2>
+<button class="Ajax">Ajax</button>
+<p class="content"></p>
+<hr>
+<input type="text" id="num1">+<input type="text" id="num2">=<input type="text" id="ret"><button class="cal">计算</button>
+<hr>
+<form action="">
+    用户名 <input type="text" id="user">
+    密码 <input type="password" id="pwd">
+    {# <input type="submit"> 这里不用submit,用submit那是用form表单发送请求了,button不具有任何事件 #}
+    <input type="button" value="submit" class="login_btn"><span class="error"></span>
+
+</form>
+
+<script>
+    $(".Ajax").click(function () {
+        // 发送Ajax请求
+        $.ajax({
+            url:"/test_ajax",       // 请求url，不写ip和端口，默认使用这个脚本所在的地址和端口
+            type:"get",   // 请求方式，还有post请求
+            data:{a:1,b:2},   // 发送数据
+            success:function (data) {   // 回调函数：事件执行完，对应执行的函数
+                console.log(data);
+                // 给html文本赋值
+                $(".content").html(data)
+            }
+        })
+    });
+    // Ajax计算求值
+    $(".cal").click(function () {
+        $.ajax({
+            url: "/cal/",    //发送给服务器视图处理运算
+            type: "POST",
+            data:{
+                "n1": $("#num1").val(),
+                "n2": $("#num2").val(),
+            },
+            // 数据发出去后，请求结果发给success函数，success可以决定将求完的值放在页面中的位置
+            success:function (data) {
+                console.log(data);
+                $("#ret").val(data);
+            }
+        })
+    });
+    // 登录验证
+    $(".login_btn").click(function () {
+        $.ajax({
+            url:"/login/",
+            type:"POST",
+            data:{
+                "user":$("#user").val(),
+                "pwd":$("#pwd").val(),
+            },
+            success:function (data) {
+                console.log(data);    // {"user": null, "msg": "username or password wrong!"}
+                console.log(typeof data);  // string,需要注意这是一个json字符串
+
+                var data = JSON.parse(data);     // 反序列化  object  {}
+                console.log(data);    // {user: null, msg: "username or password wrong!"}
+                console.log(typeof data);  // object
+
+                if (data.user) {
+                    // 如果有值，则登录成功
+                    location.href="http://www.baidu.com"
+                } else {
+                    // 如果没有值，则登录失败，页面显示提示信息
+                    $(".error").html(data.msg).css({"color":"red", "margin-left":"10px"})
+                }
+            }
+
+        })
+    })
+</script>
+</body>
+</html>
